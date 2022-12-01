@@ -439,7 +439,9 @@ class Sync(Base):
     def _insert_op(
         self, node: Node, filters: dict, payloads: List[Payload]
     ) -> dict:
-
+        logger.error(f"[STE] error testing error")
+        logger.info(f"[STE] error testing info")
+        logger.debug(f"[STE] error testing debug")
         if node.table in self.tree.tables:
 
             if node.is_root:
@@ -472,8 +474,6 @@ class Sync(Base):
 
                 for payload in payloads:
                     for i, key in enumerate(foreign_keys[node.name]):
-                        print(node.parent.name)
-                        print(foreign_keys.values())
                         if key == foreign_keys[node.parent.name][i]:
                             filters[node.parent.table].append(
                                 {
