@@ -498,12 +498,15 @@ class Sync(Base):
 
         else:
 
+            logger.info(f"else block")
             # handle case where we insert into a through table
             # set the parent as the new entity that has changed
-            foreign_keys = self.query_builder.get_foreign_keys(
+            foreign_keys = self.query_builder._get_foreign_keys(
                 node.parent,
                 node,
             )
+            logger.info(f"foreign_keys")
+            logger.info(foreign_keys)
 
             for payload in payloads:
                 for i, key in enumerate(foreign_keys[node.name]):
