@@ -442,9 +442,14 @@ class Sync(Base):
         logger.info(f"[STE] _insert_op")
         logger.info(f"node")
         logger.info(node)
+        logger.info(f"node.table")
+        logger.info(node.table)
         logger.info(f"filters")
-        logger.debug(filters)
-        if node.table in self.tree.tables:
+        logger.info(filters)
+        is_through = node.parent is not None and node in node.parent.relationship.throughs
+        logger.info(f"is_through")
+        logger.info(is_through)
+        if node.table in self.tree.tables and not is_through:
 
             if node.is_root:
 
