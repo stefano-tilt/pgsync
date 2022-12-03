@@ -478,8 +478,10 @@ class Sync(Base):
                     for i, key in enumerate(foreign_keys[node.name]):
                         logger.info(f"key")
                         logger.info(key)
-                        logger.info(f"key")
+                        logger.info(f"foreign_keys")
                         logger.info(foreign_keys)
+                        logger.info(f"i")
+                        logger.info(i)
                         if key == foreign_keys[node.parent.name][i]:
                             filters[node.parent.table].append(
                                 {
