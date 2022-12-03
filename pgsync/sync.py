@@ -507,11 +507,18 @@ class Sync(Base):
             )
             logger.info(f"foreign_keys")
             logger.info(foreign_keys)
+            logger.info(f"node.parent.table")
+            logger.info(node.parent.table)
+            logger.info(f"node.parent.name")
+            logger.info(node.parent.name)
 
             for payload in payloads:
-                for i, key in enumerate(foreign_keys[node.name]):
+                logger.info(f"payload.data")
+                logger.info(payload.data)
+                for i, key in enumerate(foreign_keys[node.parent.name]): #{'product.products_categories': ['categoriesId', 'productsId'], 'product.categories': ['id'], 'product.products': ['id']}
+
                     filters[node.parent.table].append(
-                        {foreign_keys[node.parent.name][0]: payload.data[key]}
+                        {foreign_keys[node.parent.name][i]: payload.data[key]}
                     )
 
         logger.info(f"filters")
