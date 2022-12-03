@@ -509,7 +509,7 @@ class Sync(Base):
             logger.info(foreign_keys)
 
             for payload in payloads:
-                for i, key in enumerate(foreign_keys[node.name]):
+                for i, key in enumerate(foreign_keys[node.parent.name]):
                     filters[node.parent.table].append(
                         {foreign_keys[node.parent.name][i]: payload.data[key]}
                     )
