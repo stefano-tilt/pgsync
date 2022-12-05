@@ -440,6 +440,8 @@ class Sync(Base):
         self, node: Node, filters: dict, payloads: List[Payload]
     ) -> dict:
         logger.info(f"[STE] _insert_op")
+        logger.info(f"node.parent")
+        logger.info(node.parent)
         logger.info(f"node")
         logger.info(node)
         logger.info(f"node.table")
@@ -511,13 +513,29 @@ class Sync(Base):
             logger.info(foreign_keys)
             logger.info(f"node.parent.table")
             logger.info(node.parent.table)
-            logger.info(f"node.parent.name")
+            logger.info(f"node.parent.name") #product.categories
             logger.info(node.parent.name)
 
             for payload in payloads:
-                for i, key in enumerate(foreign_keys[node.name]):
+
+                # primary_values: list = [payload.data[i] for i in node.model.primary_keys]
+                # primary_fields: dict = dict(
+                #     zip(node.model.primary_keys, primary_values)
+                # )
+                # _filters: list = []
+                # fields = defaultdict(list)
+                # for key, value in primary_fields.items():
+                #     fields[key].append(value)
+
+                for i, key in enumerate(foreign_keys[node.parent.name]): #{'product.products_categories': ['categoriesId', 'productsId'], 'product.categories': ['id'], 'product.products': ['id']}
                     filters[node.parent.table].append(
-                        {foreign_keys[node.parent.name][i]: payload.data[key]}
+                        {foreign_keys[node.parent.name][i]: payload.data['categoriesId']},
+                        {foreign_keys[node.parent.name][i]: payload.data['productsId']}
+                    )
+
+                    filters["products"].append(
+                        {"id": payload.data['productsId']},
+                        {"id": payload.data['categoriesId']}
                     )
 
         logger.info(f"filters")
