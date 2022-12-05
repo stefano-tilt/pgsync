@@ -717,6 +717,9 @@ class Sync(Base):
                 if _filters:
                     filters[self.tree.root.table].extend(_filters)
 
+        logger.info(f"_delete_op")
+        logger.info(f"filters")
+        logger.info(filters)
         return filters
 
     def _truncate_op(self, node: Node, filters: dict) -> dict:
