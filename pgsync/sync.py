@@ -439,15 +439,13 @@ class Sync(Base):
     def _insert_op(
         self, node: Node, filters: dict, payloads: List[Payload]
     ) -> dict:
-        logger.info(f"[STE] _insert_op")
+        logger.info(f"_insert_op")
         logger.info(f"node.parent")
         logger.info(node.parent)
         logger.info(f"node")
         logger.info(node)
         logger.info(f"node.table")
         logger.info(node.table)
-        logger.info(f"filters")
-        logger.info(filters)
         is_through = node.parent is not None and node in node.parent.relationship.throughs
         logger.info(f"is_through")
         logger.info(is_through)
@@ -483,12 +481,6 @@ class Sync(Base):
 
                 for payload in payloads:
                     for i, key in enumerate(foreign_keys[node.name]):
-                        logger.info(f"key")
-                        logger.info(key)
-                        logger.info(f"foreign_keys")
-                        logger.info(foreign_keys)
-                        logger.info(f"i")
-                        logger.info(i)
                         if key == foreign_keys[node.parent.name][i]:
                             filters[node.parent.table].append(
                                 {
@@ -504,39 +496,27 @@ class Sync(Base):
             # handle case where we insert into a through table
             # set the parent as the new entity that has changed
 
-            foreign_keys = self.query_builder.get_foreign_keys(
+            foreign_keys = self.query_builder._get_foreign_keys(
                 node.parent,
                 node,
             )
 
-            logger.info(f"foreign_keys")
-            logger.info(foreign_keys)
-            logger.info(f"node.parent.table")
-            logger.info(node.parent.table)
-            logger.info(f"node.parent.name") #product.categories
-            logger.info(node.parent.name)
-
             for payload in payloads:
+                primary_values: list = [
+                    payload.data[key] for key in node.model.primary_keys
+                ]
 
-                # primary_values: list = [payload.data[i] for i in node.model.primary_keys]
-                # primary_fields: dict = dict(
-                #     zip(node.model.primary_keys, primary_values)
-                # )
-                # _filters: list = []
-                # fields = defaultdict(list)
-                # for key, value in primary_fields.items():
-                #     fields[key].append(value)
+                for i, key in enumerate(foreign_keys[node.parent.name]):
+                    for val in primary_values:
+                        filters[node.parent.table].append(
+                            {foreign_keys[node.parent.name][i]: val},
+                        )
 
-                for i, key in enumerate(foreign_keys[node.parent.name]): #{'product.products_categories': ['categoriesId', 'productsId'], 'product.categories': ['id'], 'product.products': ['id']}
-                    filters[node.parent.table].append(
-                        {foreign_keys[node.parent.name][i]: payload.data['categoriesId']},
-                        {foreign_keys[node.parent.name][i]: payload.data['productsId']}
-                    )
-
-                    filters["products"].append(
-                        {"id": payload.data['productsId']},
-                        {"id": payload.data['categoriesId']}
-                    )
+                for pk in self.tree.root.model.primary_keys:
+                    for val in primary_values:
+                        filters[self.tree.root.table].append(
+                            {pk: val}
+                        )
 
         logger.info(f"filters")
         logger.info(filters)
