@@ -501,10 +501,12 @@ class Sync(Base):
             logger.info(f"else block")
             # handle case where we insert into a through table
             # set the parent as the new entity that has changed
-            foreign_keys = self.query_builder._get_foreign_keys(
+
+            foreign_keys = self.query_builder.get_foreign_keys(
                 node.parent,
                 node,
             )
+
             logger.info(f"foreign_keys")
             logger.info(foreign_keys)
             logger.info(f"node.parent.table")
@@ -513,10 +515,7 @@ class Sync(Base):
             logger.info(node.parent.name)
 
             for payload in payloads:
-                logger.info(f"payload.data")
-                logger.info(payload.data)
-                for i, key in enumerate(foreign_keys[node.parent.name]): #{'product.products_categories': ['categoriesId', 'productsId'], 'product.categories': ['id'], 'product.products': ['id']}
-
+                for i, key in enumerate(foreign_keys[node.name]):
                     filters[node.parent.table].append(
                         {foreign_keys[node.parent.name][i]: payload.data[key]}
                     )
