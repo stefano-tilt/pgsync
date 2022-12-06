@@ -439,16 +439,6 @@ class Sync(Base):
     def _insert_op(
         self, node: Node, filters: dict, payloads: List[Payload]
     ) -> dict:
-        logger.info(f"_insert_op")
-        logger.info(f"node.parent")
-        logger.info(node.parent)
-        logger.info(f"node")
-        logger.info(node)
-        logger.info(f"node.table")
-        logger.info(node.table)
-        is_through = node.parent is not None and node in node.parent.relationship.throughs
-        logger.info(f"is_through")
-        logger.info(is_through)
         if node.table in self.tree.tables:
 
             if node.is_root:
