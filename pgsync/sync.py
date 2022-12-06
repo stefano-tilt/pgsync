@@ -449,7 +449,7 @@ class Sync(Base):
         is_through = node.parent is not None and node in node.parent.relationship.throughs
         logger.info(f"is_through")
         logger.info(is_through)
-        if node.table in self.tree.tables and not is_through:
+        if node.table in self.tree.tables:
 
             if node.is_root:
 
@@ -473,50 +473,62 @@ class Sync(Base):
                     )
                     raise
 
-                # set the parent as the new entity that has changed
-                foreign_keys = self.query_builder._get_foreign_keys(
-                    node.parent,
-                    node,
-                )
+                if node in node.parent.relationship.throughs:
+                    foreign_keys = self.query_builder._get_foreign_keys(
+                        node.parent,
+                        node,
+                    )
 
-                for payload in payloads:
-                    for i, key in enumerate(foreign_keys[node.name]):
-                        if key == foreign_keys[node.parent.name][i]:
-                            filters[node.parent.table].append(
-                                {
-                                    foreign_keys[node.parent.name][
-                                        i
-                                    ]: payload.data[key]
-                                }
-                            )
+                    for payload in payloads:
+                        primary_values: list = [
+                            payload.data[key] for key in node.model.primary_keys
+                        ]
+
+                        for i, key in enumerate(foreign_keys[node.parent.name]):
+                            for val in primary_values:
+                                filters[node.parent.table].append(
+                                    {foreign_keys[node.parent.name][i]: val},
+                                )
+
+                        for pk in self.tree.root.model.primary_keys:
+                            for val in primary_values:
+                                filters[self.tree.root.table].append(
+                                    {pk: val}
+                                )
+
+                else:
+                    # set the parent as the new entity that has changed
+                    foreign_keys = self.query_builder._get_foreign_keys(
+                        node.parent,
+                        node,
+                    )
+
+                    for payload in payloads:
+                        for i, key in enumerate(foreign_keys[node.name]):
+                            if key == foreign_keys[node.parent.name][i]:
+                                filters[node.parent.table].append(
+                                    {
+                                        foreign_keys[node.parent.name][
+                                            i
+                                        ]: payload.data[key]
+                                    }
+                                )
 
         else:
 
-            logger.info(f"else block")
             # handle case where we insert into a through table
             # set the parent as the new entity that has changed
-
-            foreign_keys = self.query_builder._get_foreign_keys(
+            filters[node.parent.table] = []
+            foreign_keys = self.query_builder.get_foreign_keys(
                 node.parent,
                 node,
             )
 
             for payload in payloads:
-                primary_values: list = [
-                    payload.data[key] for key in node.model.primary_keys
-                ]
-
-                for i, key in enumerate(foreign_keys[node.parent.name]):
-                    for val in primary_values:
-                        filters[node.parent.table].append(
-                            {foreign_keys[node.parent.name][i]: val},
-                        )
-
-                for pk in self.tree.root.model.primary_keys:
-                    for val in primary_values:
-                        filters[self.tree.root.table].append(
-                            {pk: val}
-                        )
+                for i, key in enumerate(foreign_keys[node.name]):
+                    filters[node.parent.table].append(
+                        {foreign_keys[node.parent.name][i]: payload.data[key]}
+                    )
 
         logger.info(f"filters")
         logger.info(filters)
