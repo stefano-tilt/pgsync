@@ -475,7 +475,7 @@ class Sync(Base):
                         node.parent,
                         node,
                     )
-
+                    filters[node.parent.table] = []
                     for payload in payloads:
                         primary_values: list = [
                             payload.data[key] for key in node.model.primary_keys
